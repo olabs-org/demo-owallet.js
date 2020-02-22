@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo wallet (testnet)</title>
+    <style>
+        #create, #wallet {
+            display: none;
+            padding: 15px;
+        }
+
+        .button {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            outline: none;
+        }
+
+        #balance {
+            font-size: 24px;
+        }
+
+        #qrcode {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="create">
+    <input type="button" value="Create wallet" class="button" onclick="createWallet()">
+</div>
+<div id="wallet">
+    <span id="balance">0 bytes</span>
+    <div id="qrcode"></div>
+    <input type="button" value="Delete wallet" class="button" onclick="deleteWallet()">
+</div>
+<script src="./qrcode.min.js"></script>
+<script src="https://unpkg.com/owallet.js@0.0.3/dist/owallet.all.min.js"></script>
+<script>
+    const dCreate = document.getElementById('create');
+    const dWallet = document.getElementById('wallet');
+    const sBalance = document.getElementById('balance');
+    const dQR = document.getElementById('qrcode');
+
+    const w = new Wallet(null, true);
+    (async () => {
+        await w.init();
+        w.connect();
+
+        if (!!w.getAddress()) {
+            dWallet.style.display = 'block';
+            startUpdBalanceAndSetAddress(w.getAddress());
+        } else {
+            dCreate.style.display = 'block';
+        }
+    })();
+
+    async function createWallet() {
+        await w.createWallet('test_password');
+        dCreate.style.display = 'none';
+        dWallet.style.display = 'block';
+        startUpdBalanceAndSetAddress(w.getAddress());
+    }
+
+    async function startUpdBalanceAndSetAddress(address) {
+        dQR.innerHTML = '';
+        new QRCode(document.getElementById("qrcode"), "obyte-tn:" + address);
+        setInterval(async () => {
+            const balance = await w.getBalance();
+            if (balance && balance.base) {
+                sBalance.innerText = (balance.base.stable + balance.base.pending) + ' bytes';
+            }
+        }, 2000);
+        const balance = await w.getBalance();
+        sBalance.innerText = (balance.base.stable + balance.base.pending) + ' bytes';
+    }
+
+    function deleteWallet() {
+        localStorage.removeItem('pubkey_test');
+        localStorage.removeItem('account_test');
+        localStorage.removeItem('address_test');
+        dWallet.style.display = 'none';
+        dCreate.style.display = 'block';
+    }
+</script>
+</body>
+</html>

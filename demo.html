@@ -74,6 +74,8 @@
         const balance = await w.getBalance();
         if(balance.base) {
             sBalance.innerText = (balance.base.stable + balance.base.pending) + ' bytes';
+        }else{
+            sBalance.innerText = '0 bytes';
         }
     }
 

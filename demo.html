@@ -72,7 +72,9 @@
             }
         }, 2000);
         const balance = await w.getBalance();
-        sBalance.innerText = (balance.base.stable + balance.base.pending) + ' bytes';
+        if(balance.base) {
+            sBalance.innerText = (balance.base.stable + balance.base.pending) + ' bytes';
+        }
     }
 
     function deleteWallet() {
